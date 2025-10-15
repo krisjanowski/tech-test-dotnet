@@ -1,21 +1,69 @@
-### Test Description
-In the 'PaymentService.cs' file you will find a method for making a payment. At a high level the steps for making a payment are:
+\# Test Project
 
- - Lookup the account the payment is being made from
- - Check the account is in a valid state to make the payment
- - Deduct the payment amount from the account's balance and update the account in the database
- 
-What we’d like you to do is refactor the code with the following things in mind:  
- - Adherence to SOLID principals
- - Testability  
- - Readability 
 
-We’d also like you to add some unit tests to the ClearBank.DeveloperTest.Tests project to show how you would test the code that you’ve produced. The only specific ‘rules’ are:  
 
- - The solution should build.
- - The tests should all pass.
- - You should not change the method signature of the MakePayment method.
+\## What I have changed
 
-You are free to use any frameworks/NuGet packages that you see fit.  
- 
-You should plan to spend around 1 to 3 hours to complete the exercise.
+### Included `ConfigDataStoreFactory`.
+
+
+
+This is an implementation of `IDataStoreFactory` and can be injected into PaymentService, removing the direct dependency on ConfigurationManager which can be difficult to test.
+
+
+
+This also decouples the logic for choosing the correct data store, allowing a separate unit test fixture `ConfigDataStoreFactoryTest` - one less piece of logic to test in `PaymentServiceTest`.
+
+
+
+\### Wrote unit tests for `PaymentService` class.
+
+
+
+I wrote all the tests before doing any more refactoring on the class, to ensure the behaviour was not altered by the refactoring that followed. 
+
+
+
+Over two commits, I think I covered all the code paths.
+
+
+
+\### Refactored business logic in `PaymentService`.
+
+
+
+The `MakePayment` function was not adhering to the single responsibility principle. There was a switch statement with conditional rules depending on the `PaymentScheme`.
+
+
+
+I created an interface `IPaymentRule` with three implementations - one for each scheme.
+
+
+
+Then I created a `PaymentRuleFactory` (and interface) to expose a `Create(PaymentScheme paymentScheme)` method. 
+
+
+
+Once the new factory was leveraged in the `PaymentService` class, the conditional logic was abstracted away, vastly simplifying the class.
+
+### Refactored the `PaymentServiceTest` class.
+
+
+
+When I initially wrote the unit tests, I was copy/pasting each test from the last. That left me with a lot of repetition where I instantiated a MakePaymentRequest object and mocked the `IPaymentRuleFactory`.
+
+
+
+I created a private method `ArrangePayment` inside the class to take care of instantiating these objects.
+
+
+
+\## What I would change if I had more time
+
+
+
+* I would add summaries above classes, methods, and properties, for conventional inline documentation.
+* I would probably rearrange the directory structure to separate model classes from enums - all currently under 'Types'.
+* I could add unit test fixtures for each implementation of `IPaymentRule` and `PaymentRuleFactory`.
+* I would remove the now unnecessary package reference `System.Configuration.ConfigurationManager` - Just did that now.
+* I would query what the correct behaviour should be for when `DataStoreSettings.DataStoreType != "Backup"` - at the moment this is what I call a "magic string", and would be better off as an Enum member, perhaps...
