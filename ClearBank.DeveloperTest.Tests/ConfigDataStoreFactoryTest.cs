@@ -1,7 +1,8 @@
-﻿using ClearBank.DeveloperTest.Configuration;
-using ClearBank.DeveloperTest.Data;
+﻿using ClearBank.DeveloperTest.Data;
 using ClearBank.DeveloperTest.Factory;
+using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace ClearBank.DeveloperTest.Tests
 {
@@ -11,9 +12,16 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestCreate_IncorrectDataStoreType()
         {
-            var settings = new DataStoreSettings { DataStoreType = "foobar" };
+            var inMemorySettings = new Dictionary<string, string>
+            {
+                { "DataStoreSettings:DataStoreType", "foobar" }
+            };
 
-            var factory = new ConfigDataStoreFactory(settings);
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+
+            var factory = new ConfigDataStoreFactory(configuration);
             var result = factory.Create();
 
             Assert.That(result, Is.InstanceOf<AccountDataStore>());
@@ -22,9 +30,16 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestCreate_BackupDataStoreType()
         {
-            var settings = new DataStoreSettings { DataStoreType = "Backup" };
+            var inMemorySettings = new Dictionary<string, string>
+            {
+                { "DataStoreSettings:DataStoreType", "Backup" }
+            };
 
-            var factory = new ConfigDataStoreFactory(settings);
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+
+            var factory = new ConfigDataStoreFactory(configuration);
             var result = factory.Create();
 
             Assert.That(result, Is.InstanceOf<BackupAccountDataStore>());

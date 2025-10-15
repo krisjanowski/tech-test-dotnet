@@ -1,26 +1,27 @@
-﻿using ClearBank.DeveloperTest.Configuration;
-using ClearBank.DeveloperTest.Data;
+﻿using ClearBank.DeveloperTest.Data;
+using Microsoft.Extensions.Configuration;
+
 namespace ClearBank.DeveloperTest.Factory
 {
     public class ConfigDataStoreFactory
     {
-        private readonly DataStoreSettings DataStoreSettings;
+        private readonly IConfiguration Configuration;
 
-        public ConfigDataStoreFactory(DataStoreSettings dataStoreSettings)
+        public ConfigDataStoreFactory(IConfiguration configuration)
         {
-            DataStoreSettings = dataStoreSettings;
+            Configuration = configuration;
         }
 
         public IAccountDataStore Create()
         {
-            if (DataStoreSettings.DataStoreType == "Backup")
+            var type = Configuration["DataStoreSettings:DataStoreType"];
+
+            if (type == "Backup")
             {
                 return new BackupAccountDataStore();
             }
-            else
-            {
-                return new AccountDataStore();
-            }
+
+            return new AccountDataStore();
         }
     }
 }
