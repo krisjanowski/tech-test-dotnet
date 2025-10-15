@@ -17,6 +17,33 @@ namespace ClearBank.DeveloperTest.Tests
         private Mock<IPaymentRuleFactory> MockPaymentRuleFactory;
         private PaymentService PaymentService;
 
+        private MakePaymentRequest ArrangePayment(PaymentScheme scheme)
+        {
+            var request = new MakePaymentRequest
+            {
+                CreditorAccountNumber = "1234",
+                DebtorAccountNumber = "4321",
+                PaymentDate = DateTime.UtcNow,
+                Amount = 99,
+                PaymentScheme = scheme
+            };
+           
+            switch (scheme)
+            {
+                case PaymentScheme.Bacs:
+                    MockPaymentRuleFactory.Setup(f => f.Create(PaymentScheme.Bacs)).Returns(new BacsPaymentRule());
+                    break;
+                case PaymentScheme.FasterPayments:
+                    MockPaymentRuleFactory.Setup(f => f.Create(PaymentScheme.FasterPayments)).Returns(new FasterPaymentsPaymentRule());
+                    break;
+                case PaymentScheme.Chaps:
+                    MockPaymentRuleFactory.Setup(f => f.Create(PaymentScheme.Chaps)).Returns(new ChapsPaymentRule());
+                    break;
+            }
+
+            return request;
+        }
+
         [SetUp]
         public void Setup()
         {
@@ -33,18 +60,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithFasterPayments_AccountCannotBeNull()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.FasterPayments
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.FasterPayments))
-                .Returns(new FasterPaymentsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.FasterPayments);
 
             var result = PaymentService.MakePayment(request);
 
@@ -57,18 +73,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithBacs_AccountCannotBeNull()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.Bacs
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.Bacs))
-                .Returns(new BacsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.Bacs);
 
             var result = PaymentService.MakePayment(request);
 
@@ -81,18 +86,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithChaps_AccountCannotBeNull()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.Chaps
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.Chaps))
-                .Returns(new ChapsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.Chaps);
 
             var result = PaymentService.MakePayment(request);
 
@@ -105,18 +99,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithFasterPayments_AllowedPaymentSchemesDoesNotIncludeFlag()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.FasterPayments
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.FasterPayments))
-                .Returns(new FasterPaymentsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.FasterPayments);
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -137,18 +120,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithBacs_AllowedPaymentSchemesDoesNotIncludeFlag()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.Bacs
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.Bacs))
-                .Returns(new BacsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.Bacs);
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -169,18 +141,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithChaps_AllowedPaymentSchemesDoesNotIncludeFlag()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.Chaps
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.Chaps))
-                .Returns(new ChapsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.Chaps);
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -201,18 +162,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithFasterPayments_AllowedPaymentSchemesHasFlag_InsufficientBalance()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 20,
-                PaymentScheme = PaymentScheme.FasterPayments
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.FasterPayments))
-                .Returns(new FasterPaymentsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.FasterPayments);
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -233,18 +183,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithFasterPayments_AllowedPaymentSchemesHasFlag_AdequateBalance()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.FasterPayments
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.FasterPayments))
-                .Returns(new FasterPaymentsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.FasterPayments);
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -265,18 +204,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithBacs_AllowedPaymentSchemesHasFlag()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.Bacs
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.Bacs))
-                .Returns(new BacsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.Bacs);
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -297,18 +225,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithChaps_AllowedPaymentSchemesHasFlag_StatusDisabled()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.Chaps
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.Chaps))
-                .Returns(new ChapsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.Chaps);
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -329,18 +246,7 @@ namespace ClearBank.DeveloperTest.Tests
         [Test]
         public void TestMakePaymentWithChaps_AllowedPaymentSchemesHasFlag_StatusLive()
         {
-            var request = new MakePaymentRequest()
-            {
-                CreditorAccountNumber = "1234",
-                DebtorAccountNumber = "4321",
-                PaymentDate = DateTime.UtcNow,
-                Amount = 99,
-                PaymentScheme = PaymentScheme.Chaps
-            };
-
-            MockPaymentRuleFactory
-                .Setup(f => f.Create(PaymentScheme.Chaps))
-                .Returns(new ChapsPaymentRule());
+            var request = ArrangePayment(PaymentScheme.Chaps);
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
