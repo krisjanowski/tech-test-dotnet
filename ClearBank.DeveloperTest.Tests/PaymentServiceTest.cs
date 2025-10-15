@@ -2,6 +2,7 @@
 using ClearBank.DeveloperTest.Factory;
 using ClearBank.DeveloperTest.Services;
 using ClearBank.DeveloperTest.Types;
+using ClearBank.DeveloperTest.Types.PaymentRules;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -13,17 +14,20 @@ namespace ClearBank.DeveloperTest.Tests
     {
         private Mock<IAccountDataStore> MockDataStore;
         private Mock<IDataStoreFactory> MockDataStoreFactory;
+        private Mock<IPaymentRuleFactory> MockPaymentRuleFactory;
         private PaymentService PaymentService;
 
         [SetUp]
         public void Setup()
         {
             MockDataStore = new Mock<IAccountDataStore>();
-            MockDataStoreFactory = new Mock<IDataStoreFactory>();
 
+            MockDataStoreFactory = new Mock<IDataStoreFactory>();
             MockDataStoreFactory.Setup(x => x.Create()).Returns(MockDataStore.Object);
 
-            PaymentService = new PaymentService(MockDataStoreFactory.Object);
+            MockPaymentRuleFactory = new Mock<IPaymentRuleFactory>();
+
+            PaymentService = new PaymentService(MockDataStoreFactory.Object, MockPaymentRuleFactory.Object);
         }
 
         [Test]
@@ -37,6 +41,10 @@ namespace ClearBank.DeveloperTest.Tests
                 Amount = 99,
                 PaymentScheme = PaymentScheme.FasterPayments
             };
+
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.FasterPayments))
+                .Returns(new FasterPaymentsPaymentRule());
 
             var result = PaymentService.MakePayment(request);
 
@@ -58,6 +66,10 @@ namespace ClearBank.DeveloperTest.Tests
                 PaymentScheme = PaymentScheme.Bacs
             };
 
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.Bacs))
+                .Returns(new BacsPaymentRule());
+
             var result = PaymentService.MakePayment(request);
 
             Assert.That(result, Is.Not.Null);
@@ -78,6 +90,10 @@ namespace ClearBank.DeveloperTest.Tests
                 PaymentScheme = PaymentScheme.Chaps
             };
 
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.Chaps))
+                .Returns(new ChapsPaymentRule());
+
             var result = PaymentService.MakePayment(request);
 
             Assert.That(result, Is.Not.Null);
@@ -97,6 +113,10 @@ namespace ClearBank.DeveloperTest.Tests
                 Amount = 99,
                 PaymentScheme = PaymentScheme.FasterPayments
             };
+
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.FasterPayments))
+                .Returns(new FasterPaymentsPaymentRule());
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -126,6 +146,10 @@ namespace ClearBank.DeveloperTest.Tests
                 PaymentScheme = PaymentScheme.Bacs
             };
 
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.Bacs))
+                .Returns(new BacsPaymentRule());
+
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
                 AccountNumber = "4321",
@@ -153,6 +177,10 @@ namespace ClearBank.DeveloperTest.Tests
                 Amount = 99,
                 PaymentScheme = PaymentScheme.Chaps
             };
+
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.Chaps))
+                .Returns(new ChapsPaymentRule());
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -182,6 +210,10 @@ namespace ClearBank.DeveloperTest.Tests
                 PaymentScheme = PaymentScheme.FasterPayments
             };
 
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.FasterPayments))
+                .Returns(new FasterPaymentsPaymentRule());
+
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
                 AccountNumber = "4321",
@@ -209,6 +241,10 @@ namespace ClearBank.DeveloperTest.Tests
                 Amount = 99,
                 PaymentScheme = PaymentScheme.FasterPayments
             };
+
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.FasterPayments))
+                .Returns(new FasterPaymentsPaymentRule());
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
@@ -238,6 +274,10 @@ namespace ClearBank.DeveloperTest.Tests
                 PaymentScheme = PaymentScheme.Bacs
             };
 
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.Bacs))
+                .Returns(new BacsPaymentRule());
+
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
                 AccountNumber = "4321",
@@ -266,6 +306,10 @@ namespace ClearBank.DeveloperTest.Tests
                 PaymentScheme = PaymentScheme.Chaps
             };
 
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.Chaps))
+                .Returns(new ChapsPaymentRule());
+
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
                 AccountNumber = "4321",
@@ -293,6 +337,10 @@ namespace ClearBank.DeveloperTest.Tests
                 Amount = 99,
                 PaymentScheme = PaymentScheme.Chaps
             };
+
+            MockPaymentRuleFactory
+                .Setup(f => f.Create(PaymentScheme.Chaps))
+                .Returns(new ChapsPaymentRule());
 
             MockDataStore.Setup(x => x.GetAccount("4321")).Returns(new Account()
             {
